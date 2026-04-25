@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salão — Gestão Completa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="logo">
+    <h1>Salão✨</h1>
+    <span>Gestão</span>
+  </div>
+  <div class="nav-item active" onclick="nav('agenda')"><span class="icon">📅</span><span>Agenda</span></div>
+  <div class="nav-item" onclick="nav('clientes')"><span class="icon">👥</span><span>Clientes</span></div>
+  <div class="nav-item" onclick="nav('servicos')"><span class="icon">💅</span><span>Serviços</span></div>
+  <div class="nav-item" onclick="nav('financeiro')"><span class="icon">💰</span><span>Financeiro</span></div>
+</nav>
+
+<main class="main">
+
+  <div id="page-agenda" class="page active">
+    <div class="page-header">
+      <h2>Agenda</h2>
+      <p>Gerencie os agendamentos do dia</p>
+    </div>
+    <div class="date-nav">
+      <button onclick="changeDate(-1)">‹</button>
+      <span class="date-label" id="date-label"></span>
+      <button onclick="changeDate(1)">›</button>
+      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openModal('modal-agendamento')">+ Novo agendamento</button>
+    </div>
+    <div class="panel">
+      <div id="slot-list" class="slot-grid"></div>
+    </div>
+  </div>
+
+  <div id="page-clientes" class="page">
+    <div class="page-header">
+      <h2>Clientes</h2>
+      <p>Cadastro e histórico de clientes</p>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Todos os clientes</h3>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-cliente')">+ Novo cliente</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="search-cliente" placeholder="🔍  Buscar por nome ou telefone…" oninput="renderClientes()">
+      </div>
+      <table>
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Última visita</th><th>Total gasto</th><th></th></tr></thead>
+        <tbody id="clientes-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="page-servicos" class="page">
+    <div class="page-header">
+      <h2>Serviços</h2>
+      <p>Catálogo de serviços e preços</p>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Catálogo</h3>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-servico')">+ Novo serviço</button>
+      </div>
+      <div id="srv-grid" class="srv-grid"></div>
+    </div>
+  </div>
+
+  <div id="page-financeiro" class="page">
+    <div class="page-header">
+      <h2>Financeiro</h2>
+      <p>Entradas, saídas e resumo do caixa</p>
+    </div>
+    <div class="cards">
+      <div class="card green"><div class="label">Entradas</div><div class="value" id="fin-entrada">R$ 0</div><div class="sub">Este mês</div></div>
+      <div class="card"><div class="label">Saídas</div><div class="value" id="fin-saida">R$ 0</div><div class="sub">Este mês</div></div>
+      <div class="card amber"><div class="label">Lucro</div><div class="value" id="fin-lucro">R$ 0</div><div class="sub">Este mês</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Movimentações</h3>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-financeiro')">+ Lançamento</button>
+      </div>
+      <div id="fin-list"></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="overlay" id="modal-agendamento">
+  <div class="modal">
+    <h3>Novo Agendamento</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Cliente</label>
+        <select id="ag-cliente"><option value="">Selecione…</option></select>
+      </div>
+      <div class="form-group">
+        <label>Serviço</label>
+        <select id="ag-servico"><option value="">Selecione…</option></select>
+      </div>
+      <div class="form-group">
+        <label>Horário</label>
+        <select id="ag-horario">
+          <option>08:00</option><option>08:30</option><option>09:00</option><option>09:30</option>
+          <option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option>
+          <option>12:00</option><option>13:00</option><option>13:30</option><option>14:00</option>
+          <option>14:30</option><option>15:00</option><option>15:30</option><option>16:00</option>
+          <option>16:30</option><option>17:00</option><option>17:30</option><option>18:00</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="ag-status">
+          <option value="confirmado">Confirmado</option>
+          <option value="pendente">Pendente</option>
+          <option value="concluido">Concluído</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Observações</label>
+        <textarea id="ag-obs" placeholder="Alguma anotação…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-agendamento')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveAgendamento()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-cliente">
+  <div class="modal">
+    <h3>Novo Cliente</h3>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nome completo</label>
+        <input id="cli-nome" type="text" placeholder="Ex: Maria da Silva">
+      </div>
+      <div class="form-group">
+        <label>Telefone / WhatsApp</label>
+        <input id="cli-tel" type="text" placeholder="(99) 99999-9999">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input id="cli-email" type="email" placeholder="opcional">
+      </div>
+      <div class="form-group full">
+        <label>Observações</label>
+        <textarea id="cli-obs" placeholder="Alergias, preferências…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCliente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-servico">
+  <div class="modal">
+    <h3>Novo Serviço</h3>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nome do serviço</label>
+        <input id="srv-nome" type="text" placeholder="Ex: Corte feminino">
+      </div>
+      <div class="form-group">
+        <label>Preço (R$)</label>
+        <input id="srv-preco" type="number" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Duração (minutos)</label>
+        <input id="srv-dur" type="number" placeholder="60" min="5">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-servico')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveServico()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-financeiro">
+  <div class="modal">
+    <h3>Lançamento</h3>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Descrição</label>
+        <input id="fin-desc" type="text" placeholder="Ex: Pagamento corte, compra shampoo…">
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="fin-tipo">
+          <option value="entrada">💚 Entrada</option>
+          <option value="saida">🔴 Saída</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input id="fin-valor" type="number" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input id="fin-data" type="date">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-financeiro')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveFinanceiro()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========== STATE ===========
+const S = {
+  agendamentos: JSON.parse(localStorage.getItem('ag') || '[]'),
+  clientes: JSON.parse(localStorage.getItem('cli') || '[]'),
+  servicos: JSON.parse(localStorage.getItem('srv') || JSON.stringify([
+    {id:1, nome:'Corte Feminino', preco:60, dur:60},
+    {id:2, nome:'Escova/Chapinha', preco:45, dur:45},
+    {id:3, nome:'Coloração', preco:120, dur:120},
+    {id:4, nome:'Manicure', preco:35, dur:40},
+    {id:5, nome:'Pedicure', preco:40, dur:40},
+    {id:6, nome:'Sobrancelha', preco:20, dur:20},
+  ])),
+  financeiro: JSON.parse(localStorage.getItem('fin') || '[]'),
+  currentDate: new Date(),
+};
+
+function save() {
+  localStorage.setItem('ag', JSON.stringify(S.agendamentos));
+  localStorage.setItem('cli', JSON.stringify(S.clientes));
+  localStorage.setItem('srv', JSON.stringify(S.servicos));
+  localStorage.setItem('fin', JSON.stringify(S.financeiro));
+}
+
+// =========== NAV ===========
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick').includes(page)) n.classList.add('active');
+  });
+  if (page === 'agenda') renderAgenda();
+  if (page === 'clientes') renderClientes();
+  if (page === 'servicos') renderServicos();
+  if (page === 'financeiro') renderFinanceiro();
+}
+
+// =========== MODAL ===========
+function openModal(id) {
+  if (id === 'modal-agendamento') populateSelects();
+  if (id === 'modal-financeiro') { document.getElementById('fin-data').value = formatDateInput(S.currentDate); }
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+
+// =========== AGENDA ===========
+function formatDate(d) {
+  return d.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+function formatDateInput(d) {
+  return d.toISOString().split('T')[0];
+}
+function changeDate(n) {
+  S.currentDate = new Date(S.currentDate);
+  S.currentDate.setDate(S.currentDate.getDate() + n);
+  renderAgenda();
+}
+function renderAgenda() {
+  document.getElementById('date-label').textContent = formatDate(S.currentDate);
+  const dateKey = formatDateInput(S.currentDate);
+  const horariosLivre = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+  const agDia = S.agendamentos.filter(a => a.data === dateKey);
+  const el = document.getElementById('slot-list');
+  el.innerHTML = horariosLivre.map(h => {
+    const ag = agDia.find(a => a.horario === h);
+    if (ag) {
+      const cli = S.clientes.find(c => c.id == ag.clienteId);
+      const srv = S.servicos.find(s => s.id == ag.servicoId);
+      const statusMap = {confirmado:'badge-green', pendente:'badge-amber', concluido:'badge-gray'};
+      return `<div class="slot booked">
+        <span class="slot-time">${h}</span>
+        <div class="slot-info">
+          <div class="slot-name">${cli ? cli.nome : 'Cliente'}</div>
+          <div class="slot-service">${srv ? srv.nome : 'Serviço'} ${srv ? '· R$ '+srv.preco : ''}</div>
+        </div>
+        <div class="slot-status"><span class="badge ${statusMap[ag.status]||'badge-gray'}">${ag.status}</span></div>
+        <button class="btn btn-danger btn-sm" onclick="deleteAg('${ag.id}')">✕</button>
+      </div>`;
+    } else {
+      return `<div class="slot" onclick="openAgendamentoHorario('${h}')">
+        <span class="slot-time">${h}</span>
+        <div class="slot-info" style="color:var(--muted);font-size:13px">Horário disponível</div>
+        <span style="color:var(--muted);font-size:12px">+ Agendar</span>
+      </div>`;
+    }
+  }).join('');
+}
+function openAgendamentoHorario(h) {
+  populateSelects();
+  document.getElementById('ag-horario').value = h;
+  openModal('modal-agendamento');
+}
+function populateSelects() {
+  const cs = document.getElementById('ag-cliente');
+  cs.innerHTML = '<option value="">Selecione…</option>' + S.clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  const ss = document.getElementById('ag-servico');
+  ss.innerHTML = '<option value="">Selecione…</option>' + S.servicos.map(s => `<option value="${s.id}">${s.nome} — R$ ${s.preco}</option>`).join('');
+}
+function saveAgendamento() {
+  const cli = document.getElementById('ag-cliente').value;
+  const srv = document.getElementById('ag-servico').value;
+  const hor = document.getElementById('ag-horario').value;
+  if (!cli || !srv) { alert('Selecione cliente e serviço.'); return; }
+  S.agendamentos.push({
+    id: Date.now().toString(),
+    clienteId: cli, servicoId: srv,
+    horario: hor, data: formatDateInput(S.currentDate),
+    status: document.getElementById('ag-status').value,
+    obs: document.getElementById('ag-obs').value,
+  });
+  save(); closeModal('modal-agendamento'); renderAgenda();
+  document.getElementById('ag-obs').value = '';
+}
+function deleteAg(id) {
+  if (!confirm('Remover agendamento?')) return;
+  S.agendamentos = S.agendamentos.filter(a => a.id !== id);
+  save(); renderAgenda();
+}
+
+// =========== CLIENTES ===========
+function renderClientes() {
+  const q = (document.getElementById('search-cliente')?.value || '').toLowerCase();
+  const filtered = S.clientes.filter(c => c.nome.toLowerCase().includes(q) || c.tel.includes(q));
+  const tbody = document.getElementById('clientes-tbody');
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="ico">👥</div>Nenhum cliente encontrado</div></td></tr>'; return; }
+  tbody.innerHTML = filtered.map(c => {
+    const agsCli = S.agendamentos.filter(a => a.clienteId == c.id);
+    const ultimo = agsCli.sort((a,b) => b.data.localeCompare(a.data))[0];
+    const gasto = agsCli.reduce((t, a) => { const s = S.servicos.find(sv => sv.id == a.servicoId); return t + (s ? s.preco : 0); }, 0);
+    return `<tr>
+      <td><strong>${c.nome}</strong></td>
+      <td>${c.tel}</td>
+      <td>${ultimo ? ultimo.data.split('-').reverse().join('/') : '—'}</td>
+      <td><span class="badge badge-green">R$ ${gasto}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteCli(${c.id})">Remover</button></td>
+    </tr>`;
+  }).join('');
+}
+function saveCliente() {
+  const nome = document.getElementById('cli-nome').value.trim();
+  if (!nome) { alert('Informe o nome.'); return; }
+  S.clientes.push({ id: Date.now(), nome, tel: document.getElementById('cli-tel').value, email: document.getElementById('cli-email').value, obs: document.getElementById('cli-obs').value });
+  save(); closeModal('modal-cliente'); renderClientes();
+  ['cli-nome','cli-tel','cli-email','cli-obs'].forEach(id => document.getElementById(id).value = '');
+}
+function deleteCli(id) {
+  if (!confirm('Remover cliente?')) return;
+  S.clientes = S.clientes.filter(c => c.id !== id);
+  save(); renderClientes();
+}
+
+// =========== SERVIÇOS ===========
+function renderServicos() {
+  const el = document.getElementById('srv-grid');
+  if (!S.servicos.length) { el.innerHTML = '<div class="empty"><div class="ico">💅</div>Nenhum serviço cadastrado</div>'; return; }
+  el.innerHTML = S.servicos.map(s => `
+    <div class="srv-card">
+      <button class="srv-delete" onclick="deleteSrv(${s.id})">✕</button>
+      <h4>${s.nome}</h4>
+      <div class="price">R$ ${s.preco}</div>
+      <div class="dur">⏱ ${s.dur} minutos</div>
+    </div>
+  `).join('');
+}
+function saveServico() {
+  const nome = document.getElementById('srv-nome').value.trim();
+  const preco = parseFloat(document.getElementById('srv-preco').value);
+  const dur = parseInt(document.getElementById('srv-dur').value);
+  if (!nome || isNaN(preco)) { alert('Preencha nome e preço.'); return; }
+  S.servicos.push({ id: Date.now(), nome, preco, dur: isNaN(dur) ? 60 : dur });
+  save(); closeModal('modal-servico'); renderServicos();
+  ['srv-nome','srv-preco','srv-dur'].forEach(id => document.getElementById(id).value = '');
+}
+function deleteSrv(id) {
+  if (!confirm('Remover serviço?')) return;
+  S.servicos = S.servicos.filter(s => s.id !== id);
+  save(); renderServicos();
+}
+
+// =========== FINANCEIRO ===========
+function renderFinanceiro() {
+  const mes = new Date().getMonth();
+  const ano = new Date().getFullYear();
+  const domes = S.financeiro.filter(f => { const d = new Date(f.data); return d.getMonth() === mes && d.getFullYear() === ano; });
+  const entradas = domes.filter(f => f.tipo === 'entrada').reduce((t, f) => t + f.valor, 0);
+  const saidas = domes.filter(f => f.tipo === 'saida').reduce((t, f) => t + f.valor, 0);
+  document.getElementById('fin-entrada').textContent = 'R$ ' + entradas.toFixed(2);
+  document.getElementById('fin-saida').textContent = 'R$ ' + saidas.toFixed(2);
+  const lucro = entradas - saidas;
+  const el = document.getElementById('fin-lucro');
+  el.textContent = 'R$ ' + lucro.toFixed(2);
+  el.style.color = lucro >= 0 ? 'var(--green)' : 'var(--rose)';
+
+  const list = document.getElementById('fin-list');
+  const sorted = [...S.financeiro].sort((a,b) => b.data.localeCompare(a.data));
+  if (!sorted.length) { list.innerHTML = '<div class="empty"><div class="ico">💰</div>Nenhum lançamento ainda</div>'; return; }
+  list.innerHTML = sorted.map(f => `
+    <div class="fin-item">
+      <div class="fin-dot ${f.tipo}"></div>
+      <div>
+        <div class="fin-desc">${f.desc}</div>
+        <div class="fin-date">${f.data.split('-').reverse().join('/')}</div>
+      </div>
+      <div class="fin-val ${f.tipo}">${f.tipo === 'entrada' ? '+' : '-'} R$ ${parseFloat(f.valor).toFixed(2)}</div>
+      <button class="btn btn-danger btn-sm" onclick="deleteFin('${f.id}')">✕</button>
+    </div>
+  `).join('');
+}
+function saveFinanceiro() {
+  const desc = document.getElementById('fin-desc').value.trim();
+  const valor = parseFloat(document.getElementById('fin-valor').value);
+  if (!desc || isNaN(valor)) { alert('Preencha descrição e valor.'); return; }
+  S.financeiro.push({ id: Date.now().toString(), desc, tipo: document.getElementById('fin-tipo').value, valor, data: document.getElementById('fin-data').value || formatDateInput(new Date()) });
+  save(); closeModal('modal-financeiro'); renderFinanceiro();
+  ['fin-desc','fin-valor'].forEach(id => document.getElementById(id).value = '');
+}
+function deleteFin(id) {
+  if (!confirm('Remover lançamento?')) return;
+  S.financeiro = S.financeiro.filter(f => f.id !== id);
+  save(); renderFinanceiro();
+}
+
+// =========== INIT ===========
+renderAgenda();
+</script>
+</body>
+</html>
